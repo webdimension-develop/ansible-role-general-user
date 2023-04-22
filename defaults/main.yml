@@ -1,0 +1,25 @@
+---
+# defaults file for src/roles/general_user
+user_groups:
+  wheel:
+    name: 'wheel'
+    state: 'present'
+  manager:
+    name: 'manager'
+    state: 'present'
+
+general_users:
+  master-user:
+    name: 'master-user'
+    groups: 'wheel,manager'
+    group: 'wheel'
+    append: 'yes'
+    state: 'present'
+    remove: 'no'
+    password: "{{ secret.general_users.master_user.password }}"
+    public_key: "files/keys/ansible_rsa.pub"
+    login_shell: '/bin/bash'
+    create_home: 'yes'
+    sudo: 'present'
+    comment: 'master user'
+    expires: '-1'
