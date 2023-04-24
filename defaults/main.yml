@@ -1,6 +1,6 @@
 ---
 # defaults file for src/roles/general_user
-user_groups:
+general_user_groups:
   wheel:
     name: 'wheel'
     state: 'present'

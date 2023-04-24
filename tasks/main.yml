@@ -5,8 +5,8 @@
   group:
     name: "{{ item.key }}"
     state: "{{ item.value.state }}"
-  with_dict: "{{ user_groups }}"
-  when: user_groups is defined
+  with_dict: "{{ general_user_groups }}"
+  when: general_user_groups is defined
 
 - name: Debug
   debug:
