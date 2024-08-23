@@ -1,5 +1,5 @@
 ---
-# tasks file for src/roles/general_user
+#  tasks file for src/roles/general_user
 - name: Group control
   become: true
   group:
@@ -25,7 +25,7 @@
     shell: "{{ item.value.login_shell }}"
     comment: "{{ item.value.comment }}"
     expires: "{{ item.value.expires }}"
-# changed_when: False
+  # changed_when: False
   with_dict: "{{ general_users }}"
   when: general_users is defined
 
@@ -62,3 +62,61 @@
     - general_users is defined
     - item.value.sudo == 'present'
   with_dict: "{{ general_users }}"
+
+- name: Install git
+  become: true
+  dnf:
+    name: 'git'
+    state: present
+
+- name: Check installed bash_it
+  become: true
+  stat:
+    path: "/home/{{ item.value.name }}/.bash_it"
+  register: bash_it_chk_dir
+  changed_when: false
+  ignore_errors: true
+  with_dict: "{{ general_users }}"
+
+#- name: Debug
+#  become: true
+#  debug:
+#    msg: "{{ bash_it_chk_dir.results }}"
+#
+#- name: Debug2
+#  become: true
+#  debug:
+#    msg: "{{ item }}"
+#  loop: "{{ bash_it_chk_dir.results }}"
+
+- name: Git clone bash_it
+  become: true
+  become_user: "{{ item.item.key }}"
+  git:
+    repo: 'https://github.com/bash-it/bash-it.git'
+    dest: "/home/{{ item.item.key }}/.bash_it"
+    depth: 1
+    version: "master"
+  when: item.stat.exists is false
+  with_items: "{{ bash_it_chk_dir.results }}"
+
+
+- name: Bash_it install when not installed
+  become: true
+  become_user: "{{ item.item.key }}"
+  shell: |
+    ./install.sh -s
+  args:
+    chdir: '/home/{{ item.item.key }}/.bash_it/'
+  when: item.stat.exists is false
+  with_items: "{{ bash_it_chk_dir.results }}"
+
+- name: Change theme bash_it
+  become: true
+  become_user: "{{ item.item.key }}"
+  lineinfile:
+    dest: '/home/{{ item.item.key }}/.bashrc'
+    regexp: "^export BASH_IT_THEME"
+    line: "export BASH_IT_THEME='{{ bash_it_theme }}'"
+  when: item.stat.exists is false
+  with_items: "{{ bash_it_chk_dir.results }}"

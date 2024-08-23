@@ -17,7 +17,7 @@ general_users:
     state: 'present'
     remove: 'no'
     password: "{{ secret.general_users.master_user.password }}"
-    public_key: "files/keys/ansible_rsa.pub"
+    public_key: "{{ inventory_dir | dirname }}/files/keys/ansible_rsa.pub"
     login_shell: '/bin/bash'
     create_home: 'yes'
     sudo: 'present'
